@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>품고 온보딩 관리자</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f4f7fb;
+      color: #111827;
+      font-family: Pretendard, Apple SD Gothic Neo, Malgun Gothic, sans-serif;
+    }
+    .wrap {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
+    }
+    .hero {
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .hero p {
+      margin: 0;
+      color: #4b5563;
+      line-height: 1.6;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 30px rgba(15,23,42,0.05);
+    }
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .grid-3 {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .field label {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #111827;
+      box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.08);
+    }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #111827;
+      color: #fff;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .btn-green {
+      background: #065f46;
+      color: #fff;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .help {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #6b7280;
+    }
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .warn {
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      color: #9a3412;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .error {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      white-space: pre-wrap;
+    }
+    .success {
+      display: none;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      white-space: pre-wrap;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1100px;
+      font-size: 13px;
+    }
+    th, td {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 10px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f9fafb;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .chip.gray {
+      background: #f3f4f6;
+      color: #374151;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+    }
+    .small {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .preview-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+      background: #fafafa;
+    }
+    .preview-card h4 {
+      margin: 0 0 10px;
+      font-size: 14px;
+    }
+    .preview-list {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #374151;
+      white-space: pre-wrap;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 900px) {
+      .grid, .grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>품고 온보딩 관리자</h1>
+      <p>
+        엑셀 파일을 업로드하면 브라우저에서 필요한 필드를 추출한 뒤
+        Google Apps Script로 전송하여 <b>고객사RAW</b>에 적재합니다.
+        아래 목록에서 현재 진행상태도 바로 확인하고 Step0 발송/단계 변경이 가능합니다.
+      </p>
+    </div>
+
+    <div id="errorBox" class="error"></div>
+    <div id="successBox" class="success"></div>
+
+    <div class="card">
+      <h2 class="section-title">관리자 연결</h2>
+      <div class="grid">
+        <div class="field">
+          <label for="adminKey">관리자 Key</label>
+          <input type="password" id="adminKey" placeholder="GAS CONFIG.ADMIN_KEY 입력" />
+          <div class="help">코드에 하드코딩하지 않고 브라우저 localStorage에 저장합니다.</div>
+        </div>
+        <div class="field">
+          <label for="apiBaseView">Apps Script Web App URL</label>
+          <input type="text" id="apiBaseView" class="mono" readonly />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button id="saveAdminKeyBtn" class="btn btn-primary" type="button">관리자 Key 저장</button>
+        <button id="loadListBtn" class="btn btn-secondary" type="button">현재 목록 새로고침</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">엑셀 업로드 → 고객사RAW 적재</h2>
+      <div class="note">
+        다양한 파일 구조를 허용합니다. 업로드 후 화면에서 추출 결과를 먼저 확인한 뒤,
+        <b>RAW 업로드 실행</b>을 누르면 고객사RAW와 진행상태에 저장됩니다.
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <label for="fileInput">업로드 파일 선택</label>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" multiple />
+      </div>
+      <div class="btn-row">
+        <button id="parseFilesBtn" class="btn btn-primary" type="button">파일 파싱</button>
+        <button id="uploadParsedBtn" class="btn btn-green" type="button" disabled>RAW 업로드 실행</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">업로드 미리보기</h2>
+      <div id="previewArea" class="grid"></div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <div>
+          <h2 class="section-title" style="margin-bottom:4px;">현재 진행 목록</h2>
+          <div class="small">진행상태 탭 기준 현재 상태만 표시합니다.</div>
+        </div>
+        <div class="btn-row">
+          <button id="refreshBtn2" class="btn btn-secondary" type="button">목록 새로고침</button>
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-top:14px;">
+        <table>
+          <thead>
+            <tr>
+              <th>고객사명</th>
+              <th>담당자</th>
+              <th>메일</th>
+              <th>현재단계</th>
+              <th>현재상태</th>
+              <th>발송일시</th>
+              <th>입고 방법</th>
+              <th>행사</th>
+              <th>추가상품</th>
+              <th>판매자링크</th>
+              <th>Step0 발송</th>
+              <th>단계 변경</th>
+            </tr>
+          </thead>
+          <tbody id="currentTableBody">
+            <tr><td colspan="12" class="small">데이터를 불러오는 중입니다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'YOUR_APPS_SCRIPT_EXEC_URL';
+
+    const state = {
+      parsedItems: [],
+      currentItems: []
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    document.addEventListener('DOMContentLoaded', init);
+
+    function init() {
+      $('apiBaseView').value = API_BASE;
+      $('adminKey').value = localStorage.getItem('poomgo_admin_key') || '';
+
+      $('saveAdminKeyBtn').addEventListener('click', saveAdminKey);
+      $('parseFilesBtn').addEventListener('click', parseSelectedFiles);
+      $('uploadParsedBtn').addEventListener('click', uploadParsedItems);
+      $('loadListBtn').addEventListener('click', loadCurrentList);
+      $('refreshBtn2').addEventListener('click', loadCurrentList);
+
+      loadCurrentList();
+    }
+
+    function getAdminKey() {
+      return $('adminKey').value.trim();
+    }
+
+    function saveAdminKey() {
+      const key = getAdminKey();
+      if (!key) {
+        showError('관리자 Key를 입력해 주세요.');
+        return;
+      }
+      localStorage.setItem('poomgo_admin_key', key);
+      showSuccess('관리자 Key가 저장되었습니다.');
+    }
+
+    async function parseSelectedFiles() {
+      try {
+        hideMessages();
+
+        const files = Array.from($('fileInput').files || []);
+        if (!files.length) throw new Error('업로드할 엑셀 파일을 선택해 주세요.');
+
+        const results = [];
+        for (const file of files) {
+          const item = await parseWorkbookFile(file);
+          results.push(item);
+        }
+
+        state.parsedItems = results;
+        renderPreview(results);
+        $('uploadParsedBtn').disabled = results.length === 0;
+        showSuccess(`${results.length}개 파일 파싱이 완료되었습니다.`);
+      } catch (err) {
+        showError(err.message || String(err));
+      }
+    }
+
+    async function parseWorkbookFile(file) {
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: 'array' });
+
+      const cells = workbookToCells(workbook);
+
+      const customerName = findValueByKeywords(cells, ['고객사명', '브랜드스토어명', '브랜드명', '업체명', '스토어명', '상점명']) || stripFileExt(file.name);
+      const email = findEmailByKeywords(cells, ['담당자이메일', '이메일', '메일주소', 'email', 'e-mail']);
+      const managerName = findValueByKeywords(cells, ['담당자명', '담당자', '운영담당자', '사업운영 담당자', '1.(사업운영)담당자']);
+      const phone = findPhoneByKeywords(cells, ['연락처', '전화번호', '휴대폰', '담당자연락처']);
+      const apiAccount = findValueByKeywords(cells, ['API 계정', 'API계정', '판매자계정ID', '판매자 계정 ID', 'API ID', 'API아이디']);
+      const storeLink = findValueByKeywords(cells, ['스토어링크', '스토어 링크', '스마트스토어 링크', '자사몰 링크', '스토어 URL', '스토어URL']);
+      const monthlyVolume = findValueByKeywords(cells, ['월 물량', '월출고건수', '월 출고 건수', '월 예상 물량', '월 물동량']);
+      const returnLocation = buildReturnLocationFromCells(cells);
+      const returnPhone = findPhoneByKeywords(cells, ['반품 입고지 연락처', '반품지 연락처', '반품 연락처']);
+      const packagingMethod = findValueByKeywords(cells, ['포장방법', '포장 방법', '포장재', '포장 방식']) || '';
+      const skuCount = deriveSkuCount(workbook, cells);
+      const singleSkuYn = deriveSingleSkuYn(cells);
+
+      return {
+        fileName: file.name,
+        sheetNames: workbook.SheetNames,
+        customerName: customerName || '',
+        email: email || '',
+        managerName: managerName || '',
+        phone: phone || '',
+        apiAccount: apiAccount || '',
+        storeLink: storeLink || '',
+        skuCount: skuCount || '',
+        singleSkuYn: singleSkuYn || '',
+        monthlyVolume: monthlyVolume || '',
+        returnLocation: returnLocation || '',
+        returnPhone: returnPhone || '',
+        packagingMethod: packagingMethod || '',
+        systemAccessEmail: email || '',
+        noticeEmails: email || ''
+      };
+    }
+
+    function renderPreview(items) {
+      const area = $('previewArea');
+      if (!items.length) {
+        area.innerHTML = '<div class="small">미리보기 데이터가 없습니다.</div>';
+        return;
+      }
+
+      area.innerHTML = items.map((item, idx) => `
+        <div class="preview-card">
+          <h4>${escapeHtml(item.fileName)}</h4>
+          <div class="preview-list">
+고객사명: ${escapeHtml(item.customerName || '-')}
+메일주소: ${escapeHtml(item.email || '-')}
+담당자명: ${escapeHtml(item.managerName || '-')}
+연락처: ${escapeHtml(item.phone || '-')}
+API 계정: ${escapeHtml(item.apiAccount || '-')}
+스토어링크: ${escapeHtml(item.storeLink || '-')}
+운영 SKU 수: ${escapeHtml(String(item.skuCount || '-'))}
+단수 출고 SKU 여부: ${escapeHtml(item.singleSkuYn || '-')}
+월 출고 건수: ${escapeHtml(item.monthlyVolume || '-')}
+반품 입고지: ${escapeHtml(item.returnLocation || '-')}
+반품 입고지 연락처: ${escapeHtml(item.returnPhone || '-')}
+포장방법: ${escapeHtml(item.packagingMethod || '-')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function uploadParsedItems() {
+      try {
+        hideMessages();
+        const adminKey = getAdminKey();
+        if (!adminKey) throw new Error('관리자 Key를 입력해 주세요.');
+        if (!state.parsedItems.length) throw new Error('업로드할 파싱 데이터가 없습니다.');
+
+        $('uploadParsedBtn').disabled = true;
+        $('uploadParsedBtn').textContent = '업로드 중...';
+
+        const batches = chunkArray(state.parsedItems, 10);
+        for (const batch of batches) {
+          const res = await apiPost('admin_upload_raw', { items: batch }, { adminKey });
+          if (!res.ok) throw new Error(res.message || 'RAW 업로드에 실패했습니다.');
+        }
+
+        showSuccess(`${state.parsedItems.length}건이 고객사RAW에 적재되었습니다.`);
+        state.parsedItems = [];
+        $('previewArea').innerHTML = '';
+        $('fileInput').value = '';
+        await loadCurrentList();
+      } catch (err) {
+        showError(err.message || String(err));
+      } finally {
+        $('uploadParsedBtn').disabled = false;
+        $('uploadParsedBtn').textContent = 'RAW 업로드 실행';
+      }
+    }
+
+    async function loadCurrentList() {
+      try {
+        hideMessages();
+        const adminKey = getAdminKey();
+        if (!adminKey) {
+          $('currentTableBody').innerHTML = '<tr><td colspan="12" class="small">관리자 Key를 먼저 입력해 주세요.</td></tr>';
+          return;
+        }
+
+        $('currentTableBody').innerHTML = '<tr><td colspan="12" class="small">불러오는 중...</td></tr>';
+
+        const res = await apiGet('admin_list', { adminKey });
+        if (!res.ok) throw new Error(res.message || '목록 조회에 실패했습니다.');
+
+        state.currentItems = res.items || [];
+        renderCurrentList(state.currentItems);
+      } catch (err) {
+        showError(err.message || String(err));
+        $('currentTableBody').innerHTML = '<tr><td colspan="12" class="small">목록 조회 실패</td></tr>';
+      }
+    }
+
+    function renderCurrentList(items) {
+      const tbody = $('currentTableBody');
+      if (!items.length) {
+        tbody.innerHTML = '<tr><td colspan="12" class="small">데이터가 없습니다.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = items.map((item, idx) => `
+        <tr>
+          <td>
+            <div><b>${escapeHtml(item.customerName || '-')}</b></div>
+            <div class="small mono">${escapeHtml(item.sellerId || '')}</div>
+          </td>
+          <td>${escapeHtml(item.managerName || '-')}</td>
+          <td>${escapeHtml(item.email || '-')}</td>
+          <
